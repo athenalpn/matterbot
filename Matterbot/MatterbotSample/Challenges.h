@@ -20,62 +20,38 @@ namespace lospi {
 			const std::wstring& user, const std::wstring& command_text) override {
 
 
-			std::string newhashes = wstring_to_string(command_text);
-			auto length = newhashes.size();
-			std::vector<std::string>hashVector;
-			std::vector<std::string>passwordhashVector;
-			std::vector<std::string>passwordVector;
-			
+			auto length = command_text.size();
+			std::vector<Md5Digest>hashVector;
 			std::wstring returnPass;
-
-			auto i = 0;
-
-			for (i = 0; i < length;)
-			{
-				auto hash = newhashes.substr(i, 32);
-				i += 33;
-				hashVector.emplace_back(hash);
-			}
-
-			std::string alpha = "hsoj";
-			auto passLength = 0;
-
-			if(hashPassMap.empty())
-			{
-				for (passLength = 0; passLength <= 13; passLength++)
-				{
-					Combinator salt(alpha, passLength);
-					while (salt.has_next())
-					{
-						auto combo = salt.next();
-						std::string pass{ combo.begin(), combo.end() };
-						pass.append("hjhs8q");
-						auto size = pass.length();
-						auto hash = pass.c_str();
-						auto newHash = compute_md5(hash, size);
-						std::wstring wkey = get_str_from_md5(newHash);
-						std::string key = wstring_to_string(wkey);
-						hashPassMap.emplace(key, pass);
-					}
-				}
-			}
-			
 			std::wstring returnValue;
 
+		
+			//takes the hashes given by rivestment and stores them in a vector for comparison later
+			for (auto i = 0; i < length;)
+			{
+				auto hash = command_text.substr(i, 32);
+				hashVector.emplace_back(get_md5_from_str(hash));
+				i += 33;
+			}
+
+			
+			//compares the values in rivestment vector with the keys in map, than gives back the password for the matching hashes
 			for (int i = 0; i < hashVector.size(); i++)
 			{
 				auto elem = hashPassMap.find(hashVector[i]);
 				if (elem != hashPassMap.end())
 				{
 					auto value = elem->second;
-					std::wstring returnPass = string_to_wstring(value);
+					returnPass = string_to_wstring(value);
 					returnValue += L" " + returnPass;
 				}
 			
 			}
 			bot->post_message(L"rivestment try" + returnValue);
-			_sleep(2000);
-			return L"rivestment challenge 150";
+
+			//loops every second to get more challenges
+			_sleep(1500);
+			return L"rivestment challenge 50";
 
 
 		}

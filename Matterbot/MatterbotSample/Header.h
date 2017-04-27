@@ -2,4 +2,4 @@
 #include <string>
 #include <map>
 
-std::map<std::string, std::string>hashPassMap;
+std::map<lospi::Md5Digest, std::string>hashPassMap;
